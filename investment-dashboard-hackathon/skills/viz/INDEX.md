@@ -4,6 +4,7 @@
 > **Input**: Metrics from `analysis/*` (return_rate, weight, volatility, etc.)
 > **Output**: Plotly chart objects + layout metadata
 > **Downstream**: `report/*` references chart IDs (`portfolio_composition`, `return_analysis`, etc.)
+> **Recommended model**: `sonnet` — 차트 선택/스타일은 룰 기반, layout은 템플릿 적용 위주
 
 ---
 

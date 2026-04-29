@@ -6,6 +6,7 @@
 > **Output**: Standardized DataFrame conforming to `standard_schema`
 > **Depends on**: none
 > **Used by**: `analysis/*` skills
+> **Recommended model**: `sonnet` — 규칙 기반 매핑/정규화, 판단보다 절차 중심
 
 ---
 

@@ -4,6 +4,7 @@
 > **Input**: Standardized DataFrame from `parsing/*`
 > **Output**: Metrics-enriched DataFrame + advanced metrics dict
 > **Downstream**: `visualization_rules.md` and `insight_rules.md` reference metric names from these files.
+> **Recommended model**: `opus` — 수학적 공식, 리스크 지표, 크로스레퍼런스가 많아 고정밀 추론 필요
 
 ---
 

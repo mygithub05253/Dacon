@@ -4,6 +4,7 @@
 > **Input**: Metrics from `analysis/*` (return_rate, weight, mdd, sharpe_ratio, etc.)
 > **Output**: Insight card list (type, severity, template message)
 > **Downstream**: `report/*` places insight cards into the report layout.
+> **Recommended model**: `opus` — 패턴 감지, 충돌 해소, 자연어 인사이트 생성에 고수준 추론 필요
 
 ---
 

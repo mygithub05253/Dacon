@@ -4,6 +4,7 @@
 > **Input**: Charts from `viz/*` + Insights from `insight/*` + Metrics from `analysis/*`
 > **Output**: Dashboard (Streamlit) / PDF report / CSV data
 > **Upstream**: `parsing/*` -> `analysis/*` -> `viz/*` + `insight/*` -> this skill
+> **Recommended model**: `opus` — 전체 파이프라인 통합, 9개 섹션 조합, 에러 핸들링 등 복합 판단 필요
 
 ---
 

@@ -3,6 +3,7 @@
 > Navigation index for the git workflow skill files. Each file covers a focused area of git operations.
 
 > **Trigger**: git, 깃, workflow, 워크플로우, git rules, git convention
+> **Recommended model**: `sonnet` — 정해진 규칙 적용 위주, 멀티스텝 분석 불필요
 
 ---
 
