@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# 환경
+.env
+.env.*
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# 데이터 (대용량)
+*.csv
+!**/data/sample_*.csv
+*.xlsx
+!**/data/sample_*.xlsx
+
+# 임시
+tmp/
+temp/
+*.log
+
+# 명세서 작업 폴더 (CLAUDE.md 7.1 규칙 — 협업 레포에 푸시하지 않음)
+docs/md/
