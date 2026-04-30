@@ -108,6 +108,12 @@ cards:
       display: "{profitable}/{calculable} (일부 제외)"
       tooltip: "수익률 계산 불가 종목 {excluded}개 제외"
 
+  kpi_tax_label:
+    display: "(세전 기준)"
+    position: "after return percentage value"
+    style: "font-size: 11px, color: muted"
+    # description: 세후 수익률과 혼동 방지
+
   # --- 조건부 카드 (고급 지표 존재 시 교체) ---
   conditional_cards:
     - condition: "sharpe_ratio 계산 가능"
@@ -540,7 +546,13 @@ exceptions:
 section: footer
 content:
   - disclaimer:
-      text: "본 리포트는 정보 제공 목적으로 생성되었으며, 투자 권유가 아닙니다."
+      texts:
+        - "본 리포트는 정보 제공 목적으로만 작성되었으며, 투자 권유가 아닙니다."
+        - "과거 수익률이 미래 수익을 보장하지 않습니다."
+        - "투자 판단의 책임은 투자자 본인에게 있습니다."
+        - "세전 기준 수익률이며, 실제 수익은 세금 및 수수료에 따라 달라질 수 있습니다."
+      display: "all texts joined with line break"
+      style: "font-size: 11px, color: muted, border-top separator"
       required: true  # 절대 생략 불가
 
   - data_limitations:
@@ -557,8 +569,9 @@ content:
       text: "* 일부 수치는 추정값을 포함합니다."
 
   - exchange_rate_notice:
-      condition: "mixed_currency == true"
-      text: "* 환율 기준: {exchange_rate_source}, {exchange_rate_date}"
+      condition: "if mixed_currency portfolio"
+      display: "환율 기준: {source} ({date} 기준, {rate})"
+      # description: 환율 출처와 기준 시점을 명시하여 투명성 확보
 
   - generated_by:
       text: "AlphaFolio - AI 투자 대시보드"

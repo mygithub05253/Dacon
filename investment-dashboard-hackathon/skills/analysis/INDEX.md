@@ -16,6 +16,9 @@
 | [portfolio-metrics.md](portfolio-metrics.md) | Portfolio-level aggregates: total return, total valuation/investment/P&L, stock counts, sector analysis, market analysis, and return distribution buckets with color-coded ranges. |
 | [advanced-metrics.md](advanced-metrics.md) | Time-series risk indicators (requires trade history): daily returns generation, data sufficiency checks, Sharpe ratio, MDD, volatility, beta, Sortino, Calmar, win rate, avg win/loss ratio. |
 | [benchmarks.md](benchmarks.md) | Benchmark index definitions (KR/US), comparison metrics (excess return, tracking error, information ratio), analysis mode auto-switching rules, and extension points for new asset classes. |
+| [currency-rules.md](currency-rules.md) | Exchange rate source priority (API/daily/static), conversion timing, supported pairs, precision, staleness warnings. Cross-cutting supplement. |
+| [tax-fee-impact.md](tax-fee-impact.md) | Tax categories (domestic/foreign/account type), fee categories, after-tax return estimation, display rules, regulatory notes. |
+| [benchmark-selection.md](benchmark-selection.md) | Auto-benchmark selection based on portfolio composition: single-market, blended multi-market, available indices, display normalization. |
 
 ---
 

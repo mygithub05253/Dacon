@@ -57,6 +57,10 @@ insight_types:
 > Basic metrics (weight, return_rate, stock_count) first, advanced metrics (mdd, sharpe_ratio, beta) second.
 > Each rule is independent — one failure does not affect others.
 
+```yaml
+insight_global_disclaimer: "모든 인사이트는 데이터 기반 참고 정보이며, 개인 투자 상황에 따라 다를 수 있습니다. 투자 권유가 아닙니다."
+```
+
 ### 2.1 Concentration Risk
 
 ```yaml
@@ -127,7 +131,7 @@ rules:
     name: "최대 손실 종목"
     condition: "min return_rate < -10%"
     type: "warning"
-    template: "⚠️ {stock_name}이(가) {return}% 손실 중입니다. 손절 기준이나 추가 매수 여부를 점검해보세요."
+    template: "⚠️ {stock_name}이(가) {return}% 손실 중입니다. 해당 종목의 최근 실적을 확인해보시기 바랍니다. (본 정보는 투자 권유가 아닙니다.)"
     severity: "medium"
     data_required: ["return_rate"]
     exception:
@@ -194,7 +198,7 @@ rules:
     name: "과다 종목"
     condition: "stock_count > 25"
     type: "suggestion"
-    template: "💡 보유 종목이 {count}개로 많습니다. 관리 효율과 수수료를 고려하면 핵심 종목 15~20개 위주로 정리하는 것을 고려해보세요."
+    template: "💡 종목 수가 많아 관리 복잡도가 높을 수 있습니다. 포트폴리오 구성을 점검해보시기 바랍니다."
     severity: "low"
     data_required: ["stock_counts"]
 
@@ -278,7 +282,7 @@ rules:
     name: "벤치마크 하회"
     condition: "excess_return < -5%"
     type: "suggestion"
-    template: "💡 {benchmark} 대비 {excess}%p 하회 중입니다. 패시브 전략(인덱스 ETF)과의 수익률 비교를 추천합니다."
+    template: "💡 벤치마크 대비 수익률이 낮습니다. 포트폴리오 전략을 재검토해보시기 바랍니다."
     severity: "low"
     data_required: ["excess_return", "benchmark"]
 

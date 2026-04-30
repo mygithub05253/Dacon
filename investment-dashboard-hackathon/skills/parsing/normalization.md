@@ -33,6 +33,11 @@ number_normalization:
     ambiguity:
       description: "0.052가 5.2%인지 0.052%인지 모호한 경우"
       rule: "같은 컬럼의 다른 값 범위 참조. 대부분 -100~100이면 그대로, 대부분 -1~1이면 ×100"
+    percentage_conversion:
+      rule: "if all values in column < 1 AND row_count >= 3, multiply by 100"
+      guard: "if row_count < 3, do NOT convert — request user confirmation"
+      warning: "데이터가 3행 미만이어서 퍼센트 변환을 자동 적용하지 않습니다. 확인해주세요."
+      # description: 행이 적으면 0.5%가 50%로 오변환될 수 있음
 
   exception:
     non_numeric:
@@ -74,6 +79,12 @@ date_normalization:
       - "파일 내 다른 날짜값에서 패턴 추론 (13 이상 값이 첫 자리면 DD-MM)"
       - "증권사 locale 기반 추론 (국내 → YYYY-MM-DD 계열 우선)"
       - "추론 불가 시 MM/DD (미국식) 기본 적용 후 경고"
+    date_locale_rule:
+      if_broker_detected: use_broker_locale  # 증권사 감지 시 해당 국가 날짜 형식 우선
+      KR_brokers: "YYYY-MM-DD or YYYY.MM.DD"  # 한국 증권사는 항상 연-월-일
+      US_brokers: "MM/DD/YYYY"
+      default_ambiguous: "ask_user"  # 01/02/2025 같은 애매한 경우 사용자 확인
+      # description: 한국 증권사 데이터를 미국식으로 파싱하면 월/일이 뒤바뀜
 
   exception:
     invalid_date:
@@ -164,6 +175,12 @@ currency_conversion:
       JPY_KRW: 9.0
       EUR_KRW: 1470
       CNY_KRW: 185
+    fixed_rate_policy:
+      last_updated: "2025-04-01"  # 고정값 최종 갱신일
+      staleness_warning_days: 90  # 90일 경과 시 강제 경고
+      staleness_message: "고정 환율이 {days}일 전 기준입니다. 실제 환율과 차이가 있을 수 있습니다."
+      preferred: api_lookup  # API 조회를 우선, 실패 시 고정값 사용
+      # description: 환율 변동으로 수백만원 오차 방지. API 우선, 고정값은 보조
     api_source: "exchangerate-api.com (무료 티어)"
     cache_duration: "24시간"
     api_failure:

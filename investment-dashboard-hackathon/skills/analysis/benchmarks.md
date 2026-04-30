@@ -57,6 +57,14 @@ comparison_metrics:
       exception:
         tracking_error_zero: "information_ratio = N/A"
 
+comparison_methodology:
+  alignment: "investment_start_date"  # 포트폴리오 최초 투자일부터 비교 시작
+  normalization: "both series rebased to 100 at start date"
+  excess_return_type: "arithmetic"  # portfolio_return - benchmark_return
+  note: "비교 기간이 다르면 연환산 후 비교. 동일 기간 보장이 원칙"
+  display_period: "포트폴리오 시작일({start_date}) ~ 현재"
+  # description: 벤치마크와 동일 기간 정렬 없으면 비교 자체가 무의미
+
 exceptions:
   benchmark_data_missing:
     action: "벤치마크 비교 섹션 전체 비활성화"
