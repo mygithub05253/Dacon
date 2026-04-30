@@ -177,3 +177,62 @@ exceptions:
     condition: "수익률 N/A 종목 존재"
     action: "별도 '미분류' 구간으로 표시"
 ```
+
+---
+
+## 7. Dividend Aggregation (Phase 3)
+
+```yaml
+# --- Phase 3: Dividend Aggregation ---
+
+metric: total_dividend_income
+description: "전체 배당 수입 합계"
+formula: "sum(dividend_amount) for all stocks"
+unit: KRW
+display_format: "₩{value:,.0f}"
+condition: "dividend records exist"
+
+exceptions:
+  no_dividend_data:
+    action: "이 지표 및 하위 지표 전체 스킵"
+  mixed_currency_dividends:
+    action: "base_currency로 환산 후 합산"
+```
+
+```yaml
+metric: portfolio_dividend_yield
+description: "포트폴리오 배당수익률"
+formula: "total_annual_dividends / total_valuation * 100"
+unit: "%"
+display_format: "{value:.2f}%"
+condition: "total_dividend_income > 0 AND total_valuation > 0"
+
+exceptions:
+  partial_dividend_data:
+    action: "배당 데이터가 있는 종목만으로 산출, '일부 종목 기준' 태그"
+  annualization:
+    description: "데이터 기간이 1년 미만이면 연환산"
+    formula: "observed_dividends / observed_months * 12 / total_valuation * 100"
+    warning: "연환산 추정치입니다. 실제 배당수익률과 다를 수 있습니다."
+```
+
+```yaml
+metric: return_decomposition
+description: "수익률 분해: 자본이익 + 배당수익"
+components:
+  price_return:
+    formula: "total_return - income_return"
+    label: "자본이익률"
+  income_return:
+    formula: "total_dividend_income / total_invested_amount * 100"
+    label: "배당수익률"
+display: "총 수익률 {total}% = 자본이익 {price}% + 배당수익 {income}%"
+condition: "total_dividend_income > 0"
+
+exceptions:
+  no_dividends:
+    action: "분해 없이 총 수익률만 표시"
+  income_exceeds_total:
+    condition: "income_return > total_return (자본 손실이지만 배당으로 상쇄)"
+    action: "정상 표시 + '배당이 자본 손실을 일부 상쇄하고 있습니다' 인사이트 트리거"
+```

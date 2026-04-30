@@ -24,6 +24,22 @@ broker_presets:
       overseas_sheet: 1  # 토스증권 해외 종목 별도 시트
     # description: 해외 자산이 별도 시트인 경우 자동으로 병합하여 누락 방지
 
+  # --- Phase 3: 배당 내역 및 계좌 유형 파싱 ---
+  dividend_parsing:
+    detection_method: "look for columns matching dividend_amount synonyms"
+    separate_sheet: true  # 일부 증권사는 배당 내역이 별도 시트
+    merge_with_holdings: "match by ticker + date"
+    # description: 배당 내역을 보유 종목 데이터와 병합
+
+  account_type_detection:
+    method: "check file name, sheet name, or dedicated column"
+    patterns:
+      ISA: ["ISA", "개인종합자산"]
+      pension: ["연금", "pension", "연금저축"]
+      IRP: ["IRP", "퇴직연금", "개인형퇴직"]
+    default: "일반"
+    # description: 파일명/시트명에서 계좌 유형 자동 감지
+
   kiwoom:
     broker_name: "키움증권"
     locale: "ko-KR"

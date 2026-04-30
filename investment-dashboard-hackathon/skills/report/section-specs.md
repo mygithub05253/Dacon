@@ -540,7 +540,113 @@ exceptions:
 
 ---
 
-## 9. Footer
+## 9. Correlation & Diversification Analysis (Phase 3)
+
+```yaml
+# === Phase 3: New Report Sections ===
+
+section: correlation_analysis
+section_id: "correlation_analysis"
+condition: "analysis_mode in ['full_mode', 'trade_history_mode'] AND stock_count >= 3"
+order: "after risk_analysis (section 6)"
+
+components:
+  - chart_ref: "correlation_analysis.heatmap"
+    title: "종목 간 상관관계"
+    width: "100%"
+    min_data: "종목 3개 이상 + 60일 이상 거래 이력"
+
+  - diversification_ratio_card:
+      title: "분산비율 (Diversification Ratio)"
+      format: "{value:.2f}"
+      interpretation:
+        dr_gte_1_5: "양호한 분산투자"
+        dr_between_1_2_1_5: "보통 수준의 분산"
+        dr_lt_1_2: "분산 효과 제한적"
+
+  - high_correlation_pairs_table:
+      title: "높은 상관관계 종목 쌍"
+      columns: ["종목 A", "종목 B", "상관계수"]
+      max_rows: 5
+      sort: "correlation DESC"
+
+fallback:
+  condition: "stock_count < 3 OR 거래 이력 < 60일"
+  message: "분산투자 분석에는 3종목 이상과 60일 이상의 거래 이력이 필요합니다."
+```
+
+---
+
+## 10. Dividend & Income Analysis (Phase 3)
+
+```yaml
+section: dividend_analysis
+section_id: "dividend_analysis"
+condition: "dividend records exist in parsed data"
+order: "after correlation_analysis section"
+
+components:
+  - return_decomposition_card:
+      title: "수익 구성 분해"
+      display: "총 수익률 {total}% = 자본이익 {price}% + 배당수익 {income}%"
+
+  - chart_ref: "dividend_analysis.monthly_bar"
+    title: "월별 배당 수입"
+    width: "100%"
+
+  - dividend_calendar:
+      title: "배당 일정"
+      description: "향후 예정된 배당락일 표시"
+      condition: "upcoming ex-dividend dates available"
+
+  - tax_impact_note:
+      title: "세전/세후 배당금 비교"
+      display: "세전 {gross} → 세후 {net} (세율 {tax_rate}%)"
+
+fallback:
+  condition: "dividend records not found"
+  message: "배당 데이터가 없어 배당 분석 섹션을 생략합니다."
+```
+
+---
+
+## 11. Trading Activity Analysis (Phase 3)
+
+```yaml
+section: trading_activity
+section_id: "trading_activity"
+condition: "analysis_mode in ['trade_history_mode'] AND sell records exist"
+order: "after dividend_analysis section"
+
+components:
+  - turnover_summary_card:
+      title: "매매 활동 요약"
+      metrics:
+        - turnover_ratio: "연환산 회전율"
+        - avg_holding_period: "평균 보유 기간"
+        - trade_count: "총 거래 횟수"
+
+  - chart_ref: "trading_activity.trend_line"
+    title: "월별 회전율 추이"
+    width: "100%"
+
+  - fee_impact_card:
+      title: "거래 비용 영향"
+      display: "추정 연간 거래 비용: {annual_cost} (수익 대비 {cost_pct}%)"
+
+  - churning_alert:
+      condition: "turnover > 500% OR cost_to_return_ratio > 30%"
+      type: "danger"
+      message: "매매 빈도가 매우 높습니다. 거래 비용이 수익을 크게 잠식할 수 있습니다."
+
+fallback:
+  condition: "매도 내역 없음"
+  message: "매도 내역이 없어 매매 활동 분석을 생략합니다."
+```
+
+---
+
+## 12. Footer
 
 ```yaml
 section: footer

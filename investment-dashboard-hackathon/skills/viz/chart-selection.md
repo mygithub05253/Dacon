@@ -310,6 +310,89 @@ chart_rules:
             action: "테이블 하단에 별도 그룹으로 분리 표시"
 ```
 
+### 1.8 Correlation Heatmap
+
+```yaml
+# === Phase 3: New Chart Types ===
+
+  - id: "correlation_heatmap"
+    name: "상관관계 히트맵"
+    condition: "correlation_matrix 계산 가능 + 종목 3개 이상"
+    priority: 8
+    charts:
+      - type: "heatmap"
+        title: "종목 간 상관관계"
+        data: "correlation_matrix"
+        min_data: { stocks: 3 }
+        config:
+          library: plotly  # px.imshow
+          color_scale: "RdBu_r"  # -1 red ↔ 0 white ↔ +1 blue
+          annotations: true  # show r values in cells
+          diagonal: "masked"  # hide self-correlation (always 1.0)
+          y_axis_zero_baseline: false  # N/A for heatmap
+          # description: 종목 간 상관관계 히트맵. 분산투자 효과 시각화
+        fallback:
+          condition: "종목 < 3"
+          replace_with: "correlation_table (simple text table)"
+```
+
+### 1.9 Dividend Income Bar Chart
+
+```yaml
+  - id: "dividend_income_bar"
+    name: "월별 배당 수입"
+    condition: "dividend_amount + dividend_date 데이터 존재"
+    priority: 9
+    charts:
+      - type: "bar_stacked"
+        title: "월별 배당 수입"
+        data: "dividend_amount per month, stacked by ticker"
+        min_data: { dividend_records: 1 }
+        config:
+          x_axis: "month"
+          y_axis: "dividend_amount (KRW)"
+          stack_by: "ticker"
+          color: "per ticker from palette"
+          y_axis_zero_baseline: true
+          # description: 월별 배당 수입 막대 차트. 인컴 투자자 핵심 차트
+        fallback:
+          level_1:
+            condition: "종목 1개뿐 (스택 불필요)"
+            replace_with: "simple bar (no stack, total only)"
+          level_2:
+            condition: "차트 렌더링 실패"
+            replace_with: "text summary"
+```
+
+### 1.10 Turnover Trend Line
+
+```yaml
+  - id: "turnover_trend"
+    name: "회전율 추이"
+    condition: "monthly_turnover 데이터 존재"
+    priority: 10
+    charts:
+      - type: "line"
+        title: "월별 회전율 추이"
+        data: "monthly_turnover"
+        min_data: { data_points: 3 }
+        config:
+          x_axis: "month"
+          y_axis: "turnover_ratio (%)"
+          y_axis_zero_baseline: true
+          reference_lines:
+            - value: 200
+              label: "높은 회전율 기준"
+              style: "dashed red"
+            - value: 500
+              label: "과매매 기준"
+              style: "dashed darkred"
+          # description: 월별 회전율 추이. 과매매 감지 시각화
+        fallback:
+          condition: "데이터 포인트 < 3"
+          replace_with: "text summary with turnover ratio"
+```
+
 ---
 
 ## 2. Fallback Chain

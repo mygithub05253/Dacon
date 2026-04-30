@@ -329,6 +329,88 @@ rules:
     severity: "low"
 ```
 
+### 2.6 Special Situation Insights
+
+(See section 2.5 above)
+
+### 2.7 Correlation & Diversification Insights
+
+```yaml
+# === Phase 3: New Insight Patterns ===
+
+  - id: "high_correlation_pair"
+    name: "높은 상관관계 종목 쌍"
+    condition: "correlation between any pair > 0.8"
+    type: "warning"
+    template: "⚠️ {stock_a}와 {stock_b}의 상관관계가 {corr:.1%}로 높습니다. 유사한 가격 움직임을 보일 수 있습니다."
+    severity: "medium"
+    data_required: ["correlation_matrix"]
+
+  - id: "low_diversification"
+    name: "낮은 분산투자 효과"
+    condition: "diversification_ratio < 1.2"
+    type: "warning"
+    template: "⚠️ 분산투자 효과가 제한적입니다 (분산비율: {dr:.2f}). 포트폴리오 내 종목들의 상관관계가 높습니다."
+    severity: "medium"
+    data_required: ["diversification_ratio"]
+```
+
+### 2.8 Dividend & Income Insights
+
+```yaml
+  - id: "high_dividend_yield"
+    name: "높은 배당수익률"
+    condition: "portfolio_dividend_yield > 5%"
+    type: "info"
+    template: "📊 포트폴리오 배당수익률이 {yield:.1%}입니다."
+    severity: "low"
+    data_required: ["portfolio_dividend_yield"]
+
+  - id: "dividend_cut_detected"
+    name: "배당금 감소 감지"
+    condition: "any stock YoY dividend decrease > 20%"
+    type: "warning"
+    template: "⚠️ {ticker}의 배당금이 전년 대비 {change:.1%} 감소했습니다."
+    severity: "medium"
+    data_required: ["dividend_history"]
+
+  - id: "dividend_concentration"
+    name: "배당 수입 집중"
+    condition: "single stock contributes > 60% of total dividend income"
+    type: "warning"
+    template: "⚠️ 배당 수입의 {pct:.0%}가 {ticker}에 집중되어 있습니다."
+    severity: "medium"
+    data_required: ["dividend_amount"]
+```
+
+### 2.9 Trading Activity Insights
+
+```yaml
+  - id: "high_turnover"
+    name: "높은 회전율"
+    condition: "annualized turnover > 200%"
+    type: "warning"
+    template: "⚠️ 연환산 회전율이 {turnover:.0%}입니다. 거래 비용이 수익에 미치는 영향을 확인해보시기 바랍니다."
+    severity: "medium"
+    data_required: ["turnover_ratio"]
+
+  - id: "churning_alert"
+    name: "과매매 경고"
+    condition: "turnover > 500% OR cost_to_return_ratio > 30%"
+    type: "danger"
+    template: "🔴 매매 빈도가 매우 높습니다. 추정 거래 비용이 수익의 {cost_pct:.0%}를 차지합니다."
+    severity: "high"
+    data_required: ["turnover_ratio", "cost_to_return_ratio"]
+
+  - id: "short_holding_dominant"
+    name: "단기 매매 비중 높음"
+    condition: "more than 50% of trades have holding_period < 30 days"
+    type: "info"
+    template: "📊 거래의 {pct:.0%}가 30일 이내 단기 매매입니다. 보유 기간을 확인해보시기 바랍니다."
+    severity: "low"
+    data_required: ["holding_periods"]
+```
+
 ---
 
 ## 3. Conflict & Dedup Resolution
