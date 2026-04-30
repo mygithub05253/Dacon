@@ -106,6 +106,35 @@ standard_schema:
     derivation_rule: "avg_price * quantity"
     description: "종목별 투자 원금 (포트폴리오 전체 투자금액 합산에 사용)"
     note: "CSV에 투자금액 컬럼이 명시적으로 있으면 해당 값 우선 사용"
+
+  # --- Phase 3 추가 필드 (optional) ---
+  account_type:
+    type: enum
+    values: ["일반", "ISA", "ISA_서민형", "연금저축", "IRP", "OTHER"]
+    required: false
+    default: "일반"
+    synonyms: ["계좌유형", "계좌종류", "account", "계좌구분"]
+    # description: 계좌 유형별 세제 혜택 차등 적용 (참조: tax-fee-impact.md)
+
+  purchase_date:
+    type: date
+    required: false
+    synonyms: ["매수일", "매수일자", "buy_date", "거래일", "trade_date"]
+    format: auto_detect  # 참조: normalization.md date_locale_rule
+    # description: 보유기간 계산 및 장기보유 특별공제 판단용
+
+  dividend_amount:
+    type: number
+    required: false
+    unit: currency
+    synonyms: ["배당금", "배당액", "dividend", "분배금", "배당수익"]
+    # description: 배당금 수령 내역 (참조: income-analysis.md)
+
+  dividend_date:
+    type: date
+    required: false
+    synonyms: ["배당일", "배당지급일", "ex_dividend_date", "배당기준일"]
+    # description: 배당 지급일/기준일 (income-analysis.md 배당캘린더용)
 ```
 
 ---

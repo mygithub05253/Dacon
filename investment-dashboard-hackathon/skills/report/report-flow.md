@@ -10,7 +10,7 @@
 ```yaml
 report_flow:
   description: "리포트는 위에서 아래로 읽히는 스토리 구조를 따름"
-  story_arc: "요약 → 구성 → 성과 → 리스크 → 상세 → 마무리"
+  story_arc: "요약 → 구성 → 성과 → 리스크 → 상관관계 → 배당 → 매매활동 → 상세 → 마무리"
 
   sections:
     - order: 1
@@ -65,14 +65,39 @@ report_flow:
       data_source: "analysis_rules.md 마켓별 집계"
       skip_message: null  # 조용히 스킵
 
+    # === Phase 3: New Sections ===
     - order: 8
+      id: "correlation_analysis"
+      name: "상관관계 & 분산투자 분석"
+      required: false
+      skip_condition: "analysis_mode not in ['full_mode', 'trade_history_mode'] OR stock_count < 3"
+      data_source: "correlation_matrix, diversification_ratio"
+      skip_message: "분산투자 분석에는 3종목 이상이 필요합니다."
+
+    - order: 9
+      id: "dividend_analysis"
+      name: "배당 & 인컴 분석"
+      required: false
+      skip_condition: "dividend records not found in parsed data"
+      data_source: "dividend_amount, dividend_date, return_decomposition"
+      skip_message: null  # 조용히 스킵
+
+    - order: 10
+      id: "trading_activity"
+      name: "매매 활동 분석"
+      required: false
+      skip_condition: "analysis_mode not in ['trade_history_mode'] OR sell records not found"
+      data_source: "turnover_ratio, holding_periods, trade_cost"
+      skip_message: null  # 조용히 스킵
+
+    - order: 11
       id: "stock_detail_table"
       name: "종목 상세 테이블"
       required: true
       skip_condition: null
       data_source: "표준 스키마 + 계산된 지표"
 
-    - order: 9
+    - order: 12
       id: "footer"
       name: "리포트 푸터"
       required: true
@@ -88,10 +113,12 @@ report_flow:
   mode_section_map:
     full_mode:
       active: ["header", "kpi_summary", "insight_highlight", "portfolio_composition",
-               "return_analysis", "risk_analysis", "market_comparison", "stock_detail_table", "footer"]
+               "return_analysis", "risk_analysis", "market_comparison",
+               "correlation_analysis", "dividend_analysis", "trading_activity",
+               "stock_detail_table", "footer"]
     standard_mode:
       active: ["header", "kpi_summary", "insight_highlight", "portfolio_composition",
-               "return_analysis", "stock_detail_table", "footer"]
+               "return_analysis", "dividend_analysis", "stock_detail_table", "footer"]
       disabled_message:
         risk_analysis: "시계열 데이터 부족으로 리스크 분석이 제한됩니다."
     minimal_mode:
@@ -102,6 +129,7 @@ report_flow:
         risk_analysis: "리스크 분석에 필요한 데이터가 부족합니다."
     trade_history_mode:
       active: ["header", "kpi_summary", "insight_highlight", "return_analysis",
+               "correlation_analysis", "dividend_analysis", "trading_activity",
                "stock_detail_table", "footer"]
       disabled_message:
         portfolio_composition: "현재 보유 현황 데이터가 없어 구성 분석을 생략합니다."
