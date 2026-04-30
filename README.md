@@ -11,6 +11,7 @@
 | 대회명 | 기간 | 주제 | 폴더 |
 |--------|------|------|------|
 | 월간 해커톤 — 투자 데이터를 시각화하라 | 2025.04 | Skills.md 기반 투자 대시보드 설계 | [`investment-dashboard-hackathon/`](./investment-dashboard-hackathon/) |
+| 2026 스마트 공장 운영 시스템 MVP 개발 해커톤 | 2026.05 | AI 품질 예측·원인 분석 플랫폼 (QualityLens) | [`smart-factory-hackathon/`](./smart-factory-hackathon/) |
 
 ---
 
