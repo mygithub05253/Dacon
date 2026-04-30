@@ -72,6 +72,10 @@ items:
   other_stocks: "기타 시장 종목 수"
   zero_quantity: "보유량 0 종목 (매도 완료)"
 
+extreme_count_warning:
+  max_reasonable: 200  # 200종목 초과 시 경고
+  warning: "포트폴리오에 {count}개 종목이 있습니다. 데이터 중복이 아닌지 확인해주세요."
+
 display:
   format: "수익 {profitable} / 손실 {losing} / 보합 {breakeven}"
   win_rate: "profitable / (profitable + losing) * 100"
@@ -158,6 +162,12 @@ buckets:
   - label: "대수익 (> 20%)"
     range: [20, inf]
     color: "#27680A"
+
+bucket_boundary_rule:
+  convention: "left-inclusive, right-exclusive"  # [a, b)
+  zero_bucket: "[-0.001, 0.001)"  # 사실상 0% 수익률 (부동소수점 오차 허용)
+  example: "return = 0.0 → zero_bucket, return = 5.0 → [5, 10) bucket"
+  # description: 경계값 종목이 구현자마다 다른 bucket에 배정되는 문제 방지
 
 exceptions:
   all_same_bucket:

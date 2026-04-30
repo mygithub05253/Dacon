@@ -20,6 +20,17 @@ color_rule:
   negative: "red"      # < 0
   zero: "gray"         # == 0
 
+input_validation:
+  quantity_check:
+    rule: "if quantity < 0, flag as potential short position"
+    action: "exclude from standard metrics, add to short_positions separate analysis"
+    warning: "음수 수량 종목이 감지되었습니다 — 공매도 포지션으로 별도 처리됩니다."
+  extreme_valuation_check:
+    rule: "if single stock weight > 99% OR valuation > 100x median"
+    action: "flag_warning, still calculate but mark as outlier"
+    warning: "비정상적으로 큰 평가금액이 감지되었습니다. 데이터를 확인해주세요."
+  # description: 음수 수량/극단값이 전체 포트폴리오 지표를 왜곡하는 것 방지
+
 exceptions:
   avg_price_zero:
     condition: "avg_price == 0"

@@ -166,6 +166,18 @@ extension_points:
       핵심 요약을 3문장 이내로 자연스럽게 작성해주세요.
       투자 권유가 아닌 정보 제공 목적임을 유의하세요.
     
+    ai_output_validation:
+      forbidden_phrases:
+        - "매수"
+        - "매도"
+        - "추천합니다"
+        - "~하세요" # 직접적 행동 지시
+        - "반드시"
+        - "즉시"
+      action_on_violation: "replace with fallback template"
+      fallback: "AI 분석 결과가 투자 권유에 해당할 수 있어 기본 템플릿으로 대체되었습니다."
+      # description: LLM이 특정 종목 매수/매도를 직접 권유하는 출력 차단
+    
     rate_limit: "분당 5회"
     timeout: "10초"
     api_failure:

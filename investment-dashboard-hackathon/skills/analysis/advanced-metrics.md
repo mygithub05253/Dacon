@@ -18,6 +18,11 @@ daily_returns_generation:
       description: "각 날짜별 전체 포트폴리오 평가금액 계산"
       formula: "sum(quantity_i * price_i) for all stocks on each date"
       missing_price_fill: "forward fill (마지막 유효 가격으로 채움)"
+      forward_fill_limit:
+        max_days: 30  # 30일 초과 gap은 forward fill 금지
+        action_on_exceed: "mark_as_delisted_or_suspended"
+        display: "거래 정지 또는 상장 폐지 의심 — 최종 거래일: {last_trade_date}"
+        # description: 상장폐지/거래정지 종목의 가격이 영구 유지되는 것 방지
 
     step_2_daily_return:
       description: "일별 수익률 계산"
@@ -46,6 +51,16 @@ daily_returns_generation:
       description: "입출금으로 인한 포트폴리오 가치 변동"
       action: "시간가중수익률(TWR) 방식으로 입출금 효과 제거"
       formula: "각 입출금 구간별 수익률을 기하평균으로 연결"
+      twr_calculation:
+        step_1: "Identify sub-periods by deposit/withdrawal events"
+        step_2: "For each sub-period: HPR_i = (end_value - cash_flow) / start_value - 1"
+        step_3: "Geometric linking: TWR = product(1 + HPR_i) - 1"
+        step_4: "Annualize: TWR_annual = (1 + TWR)^(365/total_days) - 1"
+        deposit_detection:
+          column: "invested_amount changes between consecutive records"
+          threshold: "change > 1% of previous invested_amount"
+        fallback_if_no_history: "use simple return (current_value / invested_amount - 1)"
+        # description: 입출금이 있는 포트폴리오의 정확한 수익률. 단순수익률은 입출금 시 왜곡됨
 ```
 
 ---
@@ -87,7 +102,18 @@ description: "위험 대비 초과수익 측정"
 formula: "(annualized_return - risk_free_rate) / annualized_std"
 
 parameters:
-  risk_free_rate: 3.5       # Korean base rate (annualized, %)
+  risk_free_rate:
+    source_priority:
+      1: api_lookup  # 한국은행/FRED API에서 최신 기준금리 조회
+      2: manual_override  # 사용자 지정값
+      3: fallback_static  # API 실패 시 고정값
+    fallback_values:
+      KR: 0.035  # 최종 갱신: 2025-04-01
+      US: 0.045  # 최종 갱신: 2025-04-01
+    staleness_warning_days: 30
+    staleness_message: "무위험수익률이 {days}일 전 기준입니다. Sharpe/Sortino 비율이 부정확할 수 있습니다."
+    display_source: true  # 리포트에 출처 및 기준일 표시
+    # description: 금리 변동 시 Sharpe/Sortino가 전부 틀어지므로 동적 조회 우선
   period: "daily"
   annualize_factor: 252     # trading days
   annualized_return: "mean(daily_returns) * 252"
@@ -113,6 +139,12 @@ exceptions:
     condition: "국내+해외 혼합 포트폴리오"
     action: "국내 비중이 높으면 한국 기준금리, 해외 비중 높으면 미국 국채 수익률 사용"
     us_risk_free_rate: 4.5
+
+annualization_method:
+  standard: geometric  # (1 + cumulative_return)^(252/trading_days) - 1
+  arithmetic_only_for: "sharpe_numerator"  # Sharpe는 mean(daily) * 252 (학계 관행)
+  note: "Calmar, Sortino의 annualized_return은 반드시 geometric 방식 사용"
+  # description: 산술/기하 연환산 혼용 방지. 기간이 길수록 차이가 커짐
 ```
 
 ---

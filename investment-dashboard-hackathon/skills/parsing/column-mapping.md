@@ -39,8 +39,16 @@ standard_schema:
     description: "보유 수량"
     validation:
       min: 0             # 0 허용 (매도 완료 종목)
-      negative_handling: "음수면 abs() 적용 후 경고"
-      float_handling: "소수점 있으면 반올림 후 경고 (소수점 주식 미지원)"
+      negative_handling:
+        if_trade_type_exists: preserve_sign  # 공매도(short) 포지션 유지
+        if_trade_type_missing: flag_warning  # 사용자 확인 요청, abs() 자동 적용 금지
+        warning_message: "음수 수량이 감지되었습니다. 공매도 포지션인지 확인해주세요."
+        # description: 공매도 손익 부호 반전 방지. 자동 abs() 금지
+      float_handling:
+        KR_market: round_to_integer  # 한국 주식은 1주 단위
+        US_market: allow_float       # 미국 주식 소수점 매매 허용 (Robinhood, IBKR 등)
+        OTHER: allow_float           # 기타 시장은 float 허용
+        # description: 시장에 따라 소수점 주식 허용 여부 결정. 한국만 정수 강제
 
   avg_price:
     type: float
@@ -56,9 +64,11 @@ standard_schema:
     required: false
     description: "현재가"
     fallback:
-      strategy_1: "avg_price 값 복사 (수익률 0% 처리)"
-      strategy_2: "외부 API로 현재가 조회 시도 (yfinance)"
-      strategy_3: "사용자에게 수동 입력 요청"
+      strategy_1: null  # avg_price 복사 삭제 — 수익률이 0%로 왜곡됨
+      strategy_2: mark_as_unavailable
+      display: "현재가 미제공"
+      return_rate: null  # 수익률 산출 불가로 표시
+      # description: 현재가 없으면 N/A 처리. avg_price 복사는 수익률 0% 왜곡 유발
     validation:
       negative_handling: "음수면 abs() 적용 후 경고"
       zero_handling: "0이면 상장폐지 가능성 경고"

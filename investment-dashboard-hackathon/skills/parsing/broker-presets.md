@@ -15,8 +15,18 @@
 broker_presets:
   description: "주요 증권사별 CSV 특성을 사전 정의하여 자동 감지 정확도 향상"
 
+  multi_sheet_policy:
+    default: read_all_sheets  # 기본: 모든 시트 읽기
+    merge_strategy: vertical_concat  # 시트 간 동일 스키마면 세로 병합
+    different_schema: treat_as_separate  # 스키마 다르면 별도 데이터셋
+    toss_securities:
+      domestic_sheet: 0
+      overseas_sheet: 1  # 토스증권 해외 종목 별도 시트
+    # description: 해외 자산이 별도 시트인 경우 자동으로 병합하여 누락 방지
+
   kiwoom:
     broker_name: "키움증권"
+    locale: "ko-KR"
     encoding: EUC-KR
     delimiter: "\t"
     skip_rows: 0
@@ -33,6 +43,7 @@ broker_presets:
 
   mirae_asset:
     broker_name: "미래에셋증권"
+    locale: "ko-KR"
     encoding: UTF-8
     delimiter: ","
     skip_rows: 2               # 상단 2행 계좌 정보
@@ -46,6 +57,7 @@ broker_presets:
 
   samsung:
     broker_name: "삼성증권"
+    locale: "ko-KR"
     encoding: EUC-KR
     delimiter: ","
     skip_rows: 1
@@ -59,6 +71,7 @@ broker_presets:
 
   toss:
     broker_name: "토스증권"
+    locale: "ko-KR"
     encoding: UTF-8
     delimiter: ","
     skip_rows: 0
@@ -74,6 +87,7 @@ broker_presets:
 
   korea_investment:
     broker_name: "한국투자증권"
+    locale: "ko-KR"
     encoding: UTF-8-SIG
     delimiter: ","
     skip_rows: 3
@@ -161,6 +175,11 @@ data_errors:
     strategy:
       holdings_data: "수량 합산, 매수가는 가중평균"
       trade_data: "거래 내역이면 각 행 유지 (시계열)"
+    merge_formula:
+      avg_price: "sum(avg_price_i * quantity_i) / sum(quantity_i)"  # 수량 가중평균
+      quantity: "sum(quantity_i)"
+      invested_amount: "sum(invested_amount_i)"
+      # description: 동일 종목 합산 시 매수가는 반드시 수량(quantity) 기준 가중평균
     detection: "ticker + date 조합으로 판별"
     message: "동일 종목({ticker})이 {count}건 있어 합산했습니다."
 

@@ -84,6 +84,8 @@ chart_rules:
           show_value_labels: true
           max_bars: 20      # 20개 초과 시 상위/하위 10개씩
           zero_line: true    # 0% 기준선 표시
+          y_axis_zero_baseline: true  # 바 차트는 반드시 0에서 시작
+          # description: 0 기준 없으면 미미한 차이가 과장되어 투자 판단 오도
         exception:
           too_many_stocks:
             condition: "종목 > 20"
@@ -108,6 +110,8 @@ chart_rules:
         config:
           sort: "descending"
           show_benchmark: true
+          y_axis_zero_baseline: true  # 바 차트는 반드시 0에서 시작
+          # description: 0 기준 없으면 미미한 차이가 과장되어 투자 판단 오도
         fallback:
           condition: "섹터 1개뿐"
           replace_with: "생략 (섹터 차트 비활성화)"
@@ -139,7 +143,13 @@ chart_rules:
             action: "period_selector 비활성화, ALL만 표시"
           gaps_in_data:
             condition: "날짜가 비연속적 (주말/휴일 제외하고도 빈 날짜 존재)"
-            action: "빈 날짜를 이전 값으로 forward fill"
+            action: "gap_threshold에 따라 차등 처리"
+            gap_threshold:
+              mild: "gap < 10% of total period → forward fill + small annotation"
+              moderate: "10-20% → forward fill + prominent warning banner"
+              severe: "> 20% of total period → do NOT forward fill, show gap as blank"
+              severe_message: "데이터 공백이 전체 기간의 20%를 초과하여 차트를 생성할 수 없습니다."
+            # description: 큰 gap에서 forward fill은 심각한 수익률 왜곡 유발
             warning: "일부 거래일 데이터가 누락되어 보간했습니다."
           benchmark_missing:
             action: "포트폴리오 라인만 표시. 벤치마크 범례 제거."
@@ -178,6 +188,9 @@ chart_rules:
           bubble_size_range: [8, 40]  # 최소/최대 버블 크기
           show_quadrant_labels: true
           quadrant_origin: "median"   # 중앙값 기준 4분면
+          quadrant_label_suffix: "(포트폴리오 내 상대 기준)"
+          quadrant_tooltip: "이 구분은 포트폴리오 내 종목 간 상대 비교이며, 절대적인 고위험/저위험 판단이 아닙니다."
+          # description: 사용자가 quadrant를 절대적 평가로 오해하는 것 방지
           quadrants:
             top_left: { label: "저위험 고수익", color: "#E1F5EE" }
             top_right: { label: "고위험 고수익", color: "#FAEEDA" }
