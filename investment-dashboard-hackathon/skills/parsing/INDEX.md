@@ -39,7 +39,4 @@ Validated DataFrame  →  analysis/* skills
 
 ---
 
-## Original Source
-
-The monolithic source file is preserved at:
-[`../parsing_rules.md`](../parsing_rules.md)
+> Original monolithic `parsing_rules.md` has been removed. All content is now in the files above.

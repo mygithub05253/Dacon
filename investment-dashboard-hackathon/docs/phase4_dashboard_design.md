@@ -31,8 +31,8 @@ Streamlit의 `pages/` 디렉토리 기반 멀티페이지 기능을 사용합니
 |------|--------|--------|-----------|----------|
 | 1 | 🏠 홈 | `main.py` | 업로드 + KPI 개요 + 핵심 인사이트 | 항상 |
 | 2 | 📊 포트폴리오 | `pages/1_📊_포트폴리오.py` | 종목/섹터/마켓별 구성 분석 | 데이터 업로드 후 |
-| 3 | 📈 성과분석 | `pages/2_📈_성과분석.py` | 수익률 분석, 섹터별 비교, 벤치마크 | 데이터 업로드 후 |
-| 4 | ⚠️ 리스크 | `pages/3_⚠️_리스크.py` | 고급 지표, MDD, 변동성, 시계열 | full_mode 전용 |
+| 3 | 📈 성과분석 | `pages/2_📈_성과분석.py` | 수익률 분석, 섹터별 비교, 벤치마크, 배당 소득, 매매 활동 | 데이터 업로드 후 |
+| 4 | ⚠️ 리스크 | `pages/3_⚠️_리스크.py` | 고급 지표, MDD, 변동성, 시계열, 상관관계 히트맵 | full_mode 전용 |
 | 5 | 📋 종목상세 | `pages/4_📋_종목상세.py` | 전체 종목 테이블, 검색, 필터 | 데이터 업로드 후 |
 | 6 | 📄 리포트 | `pages/5_📄_리포트.py` | 통합 리포트 뷰 + PDF/CSV 내보내기 | 데이터 업로드 후 |
 
@@ -267,11 +267,12 @@ state_overview:
       layout: "st.columns(4)"
       cards:
         - metric: "total_return"
-          label: "총 수익률"
+          label: "총 수익률 (세전 기준)"
           format: "percentage_with_sign"
           color: "green/red"
+          note: "세전/세후 토글 버튼 제공 (tax-fee-impact.md)"
         - metric: "total_profit_loss"
-          label: "총 손익"
+          label: "총 손익 (세전 기준)"
           format: "currency_display"
           color: "green/red"
         - metric: "stock_count"
@@ -513,6 +514,70 @@ page_performance:
       fallback:
         render_fail: "기여도 테이블"
 
+    # ─── 6. 배당 소득 분석 ───
+    - id: "dividend_income"
+      title: "배당 소득 분석"
+      condition: "배당 정보 컬럼 존재 시"
+      layout: "st.columns([3, 2])"
+      left:
+        chart: "월별 배당 수령 누적 막대 차트 (ticker별 스택)"
+        component: "st.plotly_chart"
+        config:
+          x_axis: "월 (YYYY-MM)"
+          stack_by: "ticker"
+          y_label: "배당 수령액 (원)"
+          bar_mode: "stack"
+        fallback:
+          no_dividend: "st.info('배당 내역이 확인되지 않았습니다.')"
+          render_fail: "배당 테이블"
+      right:
+        content: "수익 분해 요약"
+        metrics:
+          - label: "자본이득"
+            value: "{capital_gain_pct:.1f}%"
+          - label: "배당소득"
+            value: "{dividend_pct:.1f}%"
+          - label: "포트폴리오 배당 수익률"
+            value: "{dividend_yield:.2f}%"
+        chart: "파이 차트 (자본이득 vs 배당소득 비율)"
+        component: "st.plotly_chart"
+      hidden_when: "배당 정보 없음"
+
+    # ─── 7. 매매 회전율 ───
+    - id: "turnover_analysis"
+      title: "매매 활동 분석"
+      condition: "거래 내역 존재 시"
+      layout: "st.columns([3, 2])"
+      left:
+        chart: "포트폴리오 회전율 추이 라인 차트"
+        component: "st.plotly_chart"
+        config:
+          x_axis: "분기"
+          y_axis: "회전율 (%)"
+          reference_lines:
+            - value: 200
+              label: "200% 경계 (잦은 매매)"
+              color: "orange"
+              dash: "dash"
+            - value: 500
+              label: "500% 경계 (과도한 단기 매매)"
+              color: "red"
+              dash: "dot"
+        fallback:
+          no_history: "섹션 숨김"
+          render_fail: "회전율 수치 카드"
+      right:
+        content: "매매 활동 요약 카드"
+        metrics:
+          - label: "연간 회전율"
+            value: "{annual_turnover:.0f}%"
+            color_rule: "<200 green, 200~500 orange, >500 red"
+          - label: "평균 보유기간"
+            value: "{avg_holding_days:.0f}일"
+          - label: "단타 비중"
+            value: "{short_trade_pct:.1f}% (30일 미만)"
+      hidden_when: "거래 내역 없음"
+
   exceptions:
     all_returns_zero:
       message: "모든 종목의 수익률이 0%입니다. 데이터를 확인해 주세요."
@@ -603,8 +668,44 @@ page_risk:
         - "vs KOSPI (국내 비중 높을 때)"
         - "vs S&P 500 (미국 비중 높을 때)"
         - "vs 60:40 포트폴리오 (혼합)"
+      auto_selection_badge:
+        component: "st.caption"
+        template: "벤치마크: {benchmark_name} (자동 선택) — 변경 ▼"
+        allow_override: true
       chart: "라인 차트 (포트폴리오 vs 벤치마크 누적 수익률)"
       component: "st.plotly_chart"
+
+    # ─── 5. 상관관계 히트맵 ───
+    - id: "correlation_heatmap"
+      title: "종목 간 상관관계"
+      condition: "종목 3개 이상 + 일별 수익률 시계열 존재"
+      layout: "st.columns([3, 2])"
+      left:
+        chart: "히트맵 (Heatmap)"
+        component: "st.plotly_chart"
+        config:
+          color_scale: "RdYlGn_r"  # 고상관(빨강) → 저상관(초록)
+          annot: true               # 셀에 수치 표시
+          fmt: ".2f"
+          vmin: -1.0
+          vmax: 1.0
+        fallback:
+          too_few_stocks: "종목 2개 이하 → 섹션 숨김"
+          render_fail: "상관계수 테이블"
+      right:
+        content: "분산화 요약 카드"
+        metrics:
+          - label: "분산화 비율"
+            value: "{diversification_ratio:.2f}"
+            color_rule: ">=1.5 green, 1~1.5 orange, <1 red"
+          - label: "평균 상관계수"
+            value: "{avg_correlation:.2f}"
+            color_rule: "<0.4 green, 0.4~0.7 orange, >0.7 red"
+        interpretation:
+          component: "st.caption"
+          template: |
+            분산화 비율 {ratio}은 {level} 수준입니다.
+            평균 상관계수 {avg_corr}로 포트폴리오 종목들이 {direction} 움직이는 경향이 있습니다.
 
   disabled_page:
     component: "st.info"
@@ -722,16 +823,19 @@ page_report:
     다른 페이지의 인터랙티브 차트와 달리, 여기서는 정적 요약 위주로 배치합니다.
 
   sections:
-    # report_rules.md의 9개 섹션을 순서대로 렌더링
-    - "리포트 헤더 (포트폴리오명, 총 평가금액, 기준일)"
-    - "KPI 카드 (4~5개 핵심 지표)"
+    # report_rules.md의 섹션을 순서대로 렌더링
+    - "리포트 헤더 (포트폴리오명, 총 평가금액 (세전 기준), 기준일)"
+    - "KPI 카드 (4~5개 핵심 지표, 수익률·손익에 '세전 기준' 라벨)"
     - "인사이트 요약 (종합 요약문 + 인사이트 카드 최대 5개)"
     - "포트폴리오 구성 (도넛 + 트리맵, 자동 설명)"
     - "수익률 분석 (종목별 바 + 섹터별 바)"
     - "리스크 분석 (full_mode 시 고급 지표 카드 + 차트)"
+    - "상관관계 분석 (히트맵 + 분산화 비율, 종목 3개 이상 + 시계열 조건)"
+    - "배당/소득 분석 (월별 배당 막대 + 수익 분해 파이, 배당 정보 조건)"
+    - "매매 활동 분석 (회전율 추이 + 단타 비중, 거래 내역 조건)"
     - "마켓 비교 (multi-market 시 비교 테이블)"
     - "종목 상세 테이블 (전체 종목)"
-    - "푸터 (면책 + 데이터 출처 + 생성 시각)"
+    - "푸터 (면책 4개 항목 + 환율 출처 표기 + 생성 시각)"
 
   export:
     position: "페이지 최상단 + 최하단 양쪽에 내보내기 버튼 배치"
@@ -760,10 +864,29 @@ page_report:
         - "insights.csv (인사이트 목록)"
       encoding: "UTF-8-BOM (Excel 호환)"
 
+  footer:
+    component: "st.markdown(unsafe_allow_html=True)"
+    disclaimers:
+      - "본 리포트는 투자 참고용 정보이며, 투자 권유 또는 금융 상품 추천이 아닙니다."
+      - "모든 수익률 및 손익 수치는 세전 기준이며, 실제 세후 수익은 개인 세율에 따라 다를 수 있습니다."
+      - "과거의 수익률은 미래의 성과를 보장하지 않습니다. 투자 원금 손실이 발생할 수 있습니다."
+      - "해외 자산의 원화 환산 금액은 기준일 환율을 적용하며, 환율 변동에 따라 실제 금액과 차이가 생길 수 있습니다."
+    exchange_rate_notice:
+      component: "st.caption"
+      template: |
+        환율 정보: {fx_rate} 원/USD ({fx_date} 기준) · 출처: {fx_source}
+        ※ 실시간 환율은 서비스 조건에 따라 지연될 수 있습니다.
+    generation_timestamp:
+      component: "st.caption"
+      template: "리포트 생성: {generated_at} · AlphaFolio v{version}"
+
   mode_adaptations:
     standard_mode: "리스크 섹션 → '데이터 부족' 안내 텍스트"
     minimal_mode: "수익률 + 리스크 섹션 생략"
     trade_history_mode: "포트폴리오 구성 생략"
+    no_correlation: "상관관계 분석 섹션 → 숨김"
+    no_dividend: "배당/소득 분석 섹션 → 숨김"
+    no_trade_history: "매매 활동 분석 섹션 → 숨김"
 ```
 
 ---
