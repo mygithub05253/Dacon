@@ -3,7 +3,7 @@
 > **Pipeline Position**: Stage 2
 > **Input**: Standardized DataFrame from `parsing/*`
 > **Output**: Metrics-enriched DataFrame + advanced metrics dict
-> **Downstream**: `visualization_rules.md` and `insight_rules.md` reference metric names from these files.
+> **Downstream**: `viz/*` and `insight/*` reference metric names from these files.
 > **Recommended model**: `opus` — 수학적 공식, 리스크 지표, 크로스레퍼런스가 많아 고정밀 추론 필요
 
 ---
@@ -25,11 +25,4 @@
 
 ---
 
-## Original Source
-
-All content is derived from `../analysis_rules.md` (preserved, not deleted).
-
-- Sections 1 --> `basic-metrics.md`
-- Sections 2 + 3 --> `portfolio-metrics.md`
-- Sections 4.0 - 4.6 --> `advanced-metrics.md`
-- Sections 5 + 6 + 7 --> `benchmarks.md`
+> Original monolithic `analysis_rules.md` has been removed. All content is now in the files above.

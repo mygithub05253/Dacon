@@ -140,13 +140,13 @@ prompt_principles:
 
 ```yaml
 prompt_example_parser_encoding:
-  purpose: "parsing_rules.md의 인코딩 규칙 → Python 함수"
+  purpose: "parsing/file-detection.md의 인코딩 규칙 → Python 함수"
   
   prompt: |
     당신은 AlphaFolio의 CSV 파서를 구현하는 Python 개발자입니다.
-    아래 Skills.md 규칙에 따라 파일 인코딩을 감지하는 함수를 작성하세요.
+    아래 Skills 규칙에 따라 파일 인코딩을 감지하는 함수를 작성하세요.
 
-    ## Skills.md 규칙 (parsing_rules.md 발췌)
+    ## Skills 규칙 (parsing/file-detection.md 발췌)
     ```yaml
     encoding_detection:
       strategy: "chardet 라이브러리로 자동 감지 → 실패 시 순차 시도"
@@ -196,13 +196,13 @@ prompt_example_parser_encoding:
 
 ```yaml
 prompt_example_analyzer_return:
-  purpose: "analysis_rules.md의 수익률 규칙 → Python 함수"
+  purpose: "analysis/basic-metrics.md의 수익률 규칙 → Python 함수"
   
   prompt: |
     당신은 AlphaFolio의 투자 지표 계산 모듈을 구현하는 Python 개발자입니다.
-    아래 Skills.md 규칙에 따라 종목별 수익률을 계산하는 함수를 작성하세요.
+    아래 Skills 규칙에 따라 종목별 수익률을 계산하는 함수를 작성하세요.
 
-    ## Skills.md 규칙 (analysis_rules.md 발췌)
+    ## Skills 규칙 (analysis/basic-metrics.md 발췌)
     ```yaml
     metric: return_rate
     formula: "(current_price - avg_price) / avg_price * 100"
@@ -269,20 +269,20 @@ prompt_example_analyzer_return:
         return ReturnResult(return_rate=rate, flags=flags, warnings=warnings)
 ```
 
-#### 예시 C: 차트 선택 엔진 — visualization_rules.md → Python
+#### 예시 C: 차트 선택 엔진 — viz/chart-selection.md → Python
 
 ```yaml
 prompt_example_chart_selector:
-  purpose: "visualization_rules.md의 차트 선택 규칙 → 동적 차트 선택기"
+  purpose: "viz/chart-selection.md의 차트 선택 규칙 → 동적 차트 선택기"
   
   prompt: |
     당신은 AlphaFolio의 차트 선택 엔진을 구현하는 Python 개발자입니다.
-    아래 Skills.md 규칙에 따라 데이터 조건에 맞는 차트를 자동 선택하는 함수를 작성하세요.
+    아래 Skills 규칙에 따라 데이터 조건에 맞는 차트를 자동 선택하는 함수를 작성하세요.
 
-    중요: 이 함수는 visualization_rules.md의 YAML을 런타임에 파싱하여 동작해야 합니다.
+    중요: 이 함수는 viz/chart-selection.md의 YAML을 런타임에 파싱하여 동작해야 합니다.
     하드코딩하지 마세요. 새 규칙이 YAML에 추가되면 코드 수정 없이 반영되어야 합니다.
 
-    ## Skills.md 규칙 구조 (visualization_rules.md)
+    ## Skills 규칙 구조 (viz/chart-selection.md)
     ```yaml
     chart_rules:
       - id: "portfolio_composition"
